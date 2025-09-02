@@ -4,6 +4,7 @@
     "": {
       "name": "server",
       "dependencies": {
+        "@elysiajs/cors": "^1.3.3",
         "elysia": "latest",
       },
       "devDependencies": {
@@ -13,6 +14,8 @@
   },
   "packages": {
     "@borewit/text-codec": ["@borewit/text-codec@0.1.1", "https://registry-hub.nipa.cloud/repository/npm-internal/@borewit/text-codec/-/text-codec-0.1.1.tgz", {}, "sha512-5L/uBxmjaCIX5h8Z+uu+kA9BQLkc/Wl06UGR5ajNRxu+/XjonB5i8JpgFMrPj3LXTCPA0pv8yxUvbUi+QthGGA=="],
+
+    "@elysiajs/cors": ["@elysiajs/cors@1.3.3", "https://registry-hub.nipa.cloud/repository/npm-internal/@elysiajs/cors/-/cors-1.3.3.tgz", { "peerDependencies": { "elysia": ">= 1.3.0" } }, "sha512-mYIU6PyMM6xIJuj7d27Vt0/wuzVKIEnFPjcvlkyd7t/m9xspAG37cwNjFxVOnyvY43oOd2I/oW2DB85utXpA2Q=="],
 
     "@sinclair/typebox": ["@sinclair/typebox@0.34.41", "https://registry-hub.nipa.cloud/repository/npm-internal/@sinclair/typebox/-/typebox-0.34.41.tgz", {}, "sha512-6gS8pZzSXdyRHTIqoqSVknxolr1kzfy4/CeDnrzsVz8TTIWUbOBr6gnzOmTYJ3eXQNh4IYHIGi5aIL7sOZ2G/g=="],
 
