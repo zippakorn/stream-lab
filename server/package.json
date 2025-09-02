@@ -7,9 +7,11 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.3.3",
-    "elysia": "latest"
+    "elysia": "latest",
+    "ndjson": "^2.0.0"
   },
   "devDependencies": {
+    "@types/ndjson": "^2.0.4",
     "bun-types": "latest"
   },
   "module": "src/index.js"
