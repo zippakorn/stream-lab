@@ -30,9 +30,24 @@ async function* streamAsyncJSONIterator<T>(stream: ReadableStream<Uint8Array>): 
 				return;
 			}
 
-			const string = new TextDecoder().decode(value);
-			const json = JSON.parse(string) as T;
-			yield json;
+			const string = new TextDecoder().decode(value, {stream: true});
+      console.log('Received chunk:', string);
+      const lines = string.split('\n')
+
+      for (const line of lines) {
+        const l = line.trim();
+
+        if (l.length === 0) {
+          continue;
+        }
+
+        try {
+          const dataLine = JSON.parse(l);
+          yield dataLine as T;
+        } catch (err) {
+          throw err;
+        }
+      }
 		}
 	} catch (err) {
 		reader.cancel();
