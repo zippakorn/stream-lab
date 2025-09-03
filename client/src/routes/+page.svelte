@@ -43,10 +43,9 @@
 			error: (err) => {
 				console.error('Error:', err);
 			},
-			complete: () => {
-				console.log('Completed');
+			finalize: () => {
 				isLoading = false;
-			}
+			},
 		});
 	});
 </script>

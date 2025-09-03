@@ -3,6 +3,7 @@ type Observer<T> = {
   next: (value: T) => void
   error: (error: any) => void
   complete: () => void
+  finalize: () => void
 }
 
 type Unsubscribable = {
@@ -13,12 +14,15 @@ export class Observable<T> {
   private started: boolean = false;
   private completed: boolean = false;
   private observers: Partial<Observer<T>>[] = [];
-  private internalObserver: Pick<Observer<T>, 'next' | 'complete'> = {
+  private internalObserver: Pick<Observer<T>, 'next' | 'complete' | 'finalize'> = {
     next: (value: T) => {
       this.observers.forEach(observer => observer.next?.(value));
     },
     complete: () => {
-      this.observers.forEach(observer => observer.complete?.());
+      this.internalObserver.finalize();
+    },
+    finalize: () => {
+      this.observers.forEach(observer => observer.finalize?.());
       this.completed = true;
       this.observers = [];
     }
@@ -38,9 +42,7 @@ export class Observable<T> {
       try {
         this.subscribeFn(this.internalObserver)
       } catch (error) {
-        this.observers.forEach(obs => obs.error?.(error));
-        this.completed = true;
-        this.observers = [];
+        this.internalObserver.finalize();
       }
     }
 
