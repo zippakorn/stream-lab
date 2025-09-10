@@ -2,7 +2,7 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import ndjson from 'ndjson';
 import axios from 'axios';
-import { catchError, concat, forkJoin, from, map, merge, of, tap } from 'rxjs';
+import { catchError, forkJoin, from, fromEventPattern, map, merge, of, tap } from 'rxjs';
 import { PassThrough } from 'stream';
 
 const app = new Elysia()
@@ -11,6 +11,9 @@ const app = new Elysia()
   .get('/limit', ({ set }) => {
     const stream = ndjson.stringify();
     // const stream = new PassThrough();
+    stream.on('close', () => {
+      console.log('Stream closed');
+    });
 
     try {
       set.headers['Content-Type'] = 'application/x-ndjson';
@@ -76,7 +79,6 @@ const app = new Elysia()
         .subscribe({
           error: (err) => {
             console.log('Error in /limit processing:', err);
-            stream.emit('error', err);
             stream.end();
           },
           complete: () => {
