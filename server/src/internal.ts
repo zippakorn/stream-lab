@@ -15,13 +15,30 @@ export const app = new Elysia()
       maxInstances: 10,
       memory: 1024,
       maxMemory: 2048,
-      maxStorage: 20,
-      maxBandwidth: 500,
+      maxStorage: undefined,
+      maxBandwidth: undefined,
     };
 
     await sleep(2000); // Simulate delay
 
     console.timeEnd('compute-quota');
+
+    return res;
+  })
+  .get('/default-compute-quota', async ({ set }) => {
+    console.log('Received request for /default-compute-quota');
+    console.time('default-compute-quota');
+    set.headers['Content-Type'] = 'application/json';
+    const res =  {
+      maxInstances: 1,
+      maxMemory: 2048,
+      maxStorage: 100,
+      maxBandwidth: 100,
+    };
+
+    await sleep(3000); // Simulate delay
+
+    console.timeEnd('default-compute-quota');
 
     return res;
   })
@@ -47,6 +64,6 @@ export const app = new Elysia()
 
     return 200;
   })
-  .listen(3001);
+  .listen(4001);
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
