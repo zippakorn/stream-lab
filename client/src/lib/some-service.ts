@@ -21,33 +21,48 @@ async function* streamAsyncIterator<T>(stream: ReadableStream<T>): AsyncGenerato
 
 async function* streamAsyncJSONIterator<T>(stream: ReadableStream<Uint8Array>): AsyncGenerator<T> {
 	const reader = stream.getReader();
+	let dataBuffer = '';
 
 	try {
 		while (true) {
 			const { done, value } = await reader.read();
 
 			if (done) {
+				dataBuffer = dataBuffer.trim();
+
+				if (dataBuffer.length > 0) {
+					try {
+						const dataLine = JSON.parse(dataBuffer);
+						yield dataLine as T;
+					} catch (err) {}
+				}
+
 				return;
 			}
 
-			const string = new TextDecoder().decode(value, {stream: true});
-      console.log('Received chunk:', string);
-      const lines = string.split('\n')
+			let data = new TextDecoder().decode(value, { stream: true });
+			dataBuffer += data;
 
-      for (const line of lines) {
-        const l = line.trim();
+			console.log('Received chunk:', data);
 
-        if (l.length === 0) {
-          continue;
-        }
+			const lines = dataBuffer.split('\n');
 
-        try {
-          const dataLine = JSON.parse(l);
-          yield dataLine as T;
-        } catch (err) {
-          throw err;
-        }
-      }
+			for (const line of lines) {
+				const l = line.trim();
+
+				if (l.length === 0) {
+					continue;
+				}
+
+				try {
+					const dataLine = JSON.parse(l);
+					yield dataLine as T;
+				} catch (err) {
+					break;
+				}
+			}
+
+			dataBuffer = lines[lines.length - 1];
 		}
 	} catch (err) {
 		reader.cancel();
@@ -66,16 +81,32 @@ export interface Limit {
 function getLimit(): Observable<Limit> {
 	return new Observable<Limit>(async (o) => {
 		const axiosInstance = axios.create({
-			baseURL: 'http://localhost:3000',
+			baseURL: 'http://localhost:4000',
 			headers: {
 				'Content-Type': 'application/json'
 			},
 			responseType: 'stream',
 			adapter: 'fetch'
 		});
-		const { data } = await axiosInstance.get<ReadableStream<Uint8Array>>('/limit');
-		for await (const value of streamAsyncJSONIterator<Limit>(data)) {
-			o.next(value);
+		axiosInstance.interceptors.response.use((response) => {
+			console.log('Received response', response, response.headers['content-type']);
+			if (
+				response.config.responseType === 'stream' &&
+				response.headers['content-type'] === 'application/x-ndjson' &&
+				response.data instanceof ReadableStream
+			) {
+				response.data = streamAsyncJSONIterator<any>(response.data);
+				console.log('Response data is a ReadableStream, converted to AsyncIterator', response);
+
+				return response;
+			}
+
+			return response;
+		});
+		const { data } = await axiosInstance.get<any>('/limit');
+		console.log('Received response from /limit', data);
+		for await (const value of data) {
+			o.next(value as any);
 		}
 
 		o.complete();
