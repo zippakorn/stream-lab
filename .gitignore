@@ -1,5 +1,5 @@
 # Ignore Bun lockfiles
-bun.lock
+bun.lockb
 **/node_modules
 
 # Client
